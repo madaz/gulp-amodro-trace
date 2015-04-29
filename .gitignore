@@ -1,0 +1,10 @@
+#editor webstorm
+.idea
+#editor sublime
+*.sublime-*
+
+#node
+node_modules
+
+#tsd definitions definitly typed
+typings/

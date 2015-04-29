@@ -1,0 +1,30 @@
+{
+  "name": "gulp-amodro-trace",
+  "version": "0.0.1",
+  "description": "gulp plugin for amodro-trace",
+  "homepage": "https://github.com/madaz/gulp-amodro-trace",
+  "bugs": "https://github.com/madaz/gulp-amodro-trace/issues",
+  "keywords": [
+    "gulpplugin",
+    "amodro",
+    "amodro-trace"
+  ],
+  "author": {
+    "name": "Adam de Baugh",
+    "url": "https://github.com/madaz"
+  },
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">= 0.12.2"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-typescript": "^2.6.0"
+  },
+  "dependencies": {
+    "amodro-trace": "0.0.2",
+    "gulp-util": "^3.0.4",
+    "path": "^0.11.14",
+    "through2": "^0.6.5"
+  }
+}
