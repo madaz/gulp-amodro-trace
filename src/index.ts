@@ -1,108 +1,124 @@
 /// <reference path="../typings/tsd.d.ts" />
 /// <reference path="amodro-trace.d.ts" />
 
-var gulp = require('gulp');
-var gutil = require('gulp-util');
-var through = require('through2');
-var path = require('path');
-var amodroTrace = require('amodro-trace');
-var allWriteTransforms = require('amodro-trace/write/all');
+var gulp = require( 'gulp' );
+var gutil = require( 'gulp-util' );
+var through = require( 'through2' );
+var path = require( 'path' );
+var amodroTrace = require( 'amodro-trace' );
+var allWriteTransforms = require( 'amodro-trace/write/all' );
 
-var PLUGIN_NAME = 'gulp-amodro';
+var PLUGIN_NAME = 'gulp-amodro-trace';
 
 // Create the writeTransform function by passing options to be used by the
 // write transform factories:
-var writeTransform = allWriteTransforms({
+var writeTransform = allWriteTransforms( {
     // See the write transforms section for options.
-});
+} );
+
+// The AMD loader config to use.
+type DefaultFileExists = ( id: string, filePath: string ) => boolean;
+type DefaultFileRead = ( id: string, filePath: string ) => string;
+
+interface IAmdOptions {
+    baseUrl?: string;
+    paths?: { [key: string]: string; };
+}
 
 interface IOptions {
     rootDir?: string;
+    includeContents: boolean;
+    excludeFiles: string[]; // array of file ids to exclude
+//    fileExists?: ( defaultExists: DefaultFileExists, id: string, filePath: string ) => boolean;
+//    fileRead?: ( defaultRead: DefaultFileRead, id: string, filePath: string ) => string;
 }
 
-// options { rootDir: absolute path to wwwroot }
-var gulpAmodro = function(options: IOptions): NodeJS.ReadWriteStream {
+var defaultOptions: IOptions = {
+    includeContents: true,
+    rootDir: process.cwd(),
+    excludeFiles: []
+};
 
-    gutil.log(gutil.colors.green(PLUGIN_NAME));
+var gulpAmodro = function ( options: IOptions, amdOptions?: IAmdOptions ): NodeJS.ReadWriteStream {
 
-    options = options || {};
-    options.rootDir = options.rootDir || process.cwd();
+    gutil.log( gutil.colors.green( PLUGIN_NAME ) );
 
-    var firstFile;
+    options = options || defaultOptions;
 
-    function bufferContents(file, enc, cb) {
+    function bufferContents ( file, enc, cb ) {
 
         // ignore empty files
-        if (file.isNull()) {
+        if ( file.isNull() ) {
             cb();
             return;
         }
 
         // we dont do streams (yet)
-        if (file.isStream()) {
-            this.emit('error', new gutil.PluginError(PLUGIN_NAME, 'Streaming not supported'));
+        if ( file.isStream() ) {
+            this.emit( 'error', new gutil.PluginError( PLUGIN_NAME, 'Streaming not supported' ) );
             cb();
             return;
         }
 
-        // set first file if not already set
-        if (!firstFile) {
-            firstFile = file;
-        }
-
-        var mainFile = path.parse(file.path);
-        var rootDir = path.relative(options.rootDir, mainFile.dir);
+        var mainFile = path.parse( file.path );
+        var rootDir = path.relative( options.rootDir, mainFile.dir );
         var self = this;
 
-        amodroTrace({
-            // The root directory, usually the root of the web project, and what the
-            // AMD baseUrl is relative to. Should be an absolute path.
-            rootDir: rootDir,
-            id: mainFile.name,
-            includeContents: true,
-            writeTransform: writeTransform,
-            fileRead: function (defaultRead, id, filePath) {
-                // performance, dont need to read again
-                if (id === mainFile.name) {
-                    return file.contents.toString();
+        amodroTrace( {
+                // The root directory, usually the root of the web project, and what the
+                // AMD baseUrl is relative to. Should be an absolute path.
+                rootDir: rootDir,
+                id: mainFile.name,
+                includeContents: options.includeContents === true,
+                writeTransform: writeTransform,
+                fileRead: ( defaultRead: DefaultFileRead, id: string, filePath: string ): string => {
+
+                    if (options.excludeFiles.indexOf(id) > -1) {
+                        return '';
+                    }
+
+                    // performance, don't need to read again
+                    if ( id === mainFile.name ) {
+                        return file.contents.toString();
+                    }
+
+                    return defaultRead( id, filePath );
                 }
-                return defaultRead(id, filePath);
-            }
-        }, {
-            // The AMD loader config to use.
-            baseUrl: '',
-            paths: {
-                // app: '../app'
-            }
-        }).then(function (traceResult) {
+            }, amdOptions || {}
+        ).then( ( traceResult ) => {
 
-            if (traceResult.errors && traceResult.errors.length) {
+                if ( traceResult.errors && traceResult.errors.length ) {
 
-                // throw to Promise.Catch()
-                var errorMessage = traceResult.errors.map(function (error) {
-                    return error.toString()
-                }).join('\n');
-                throw new Error(errorMessage);
+                    // throw to Promise.Catch()
+                    var errorMessage = traceResult.errors.map( function ( error ) {
+                        return error.toString();
+                    } ).join( '\n' );
+                    throw new Error( errorMessage );
 
-            }
+                }
 
-            // map each part
-            return traceResult.traced.map(function (result) {
-                return new gutil.File({ cwd: "", base: "", path: result.path, contents: new Buffer(result.contents) });
-            });
+                // map each part
+                return traceResult.traced.map( function ( result ) {
+                    return new gutil.File( {
+                        cwd: "",
+                        base: "",
+                        path: result.path,
+                        contents: new Buffer( result.contents )
+                    } );
+                } );
 
-        }).then(function (files) {
-            files.forEach(function (f) {
-                self.push(f);
-            });
-            cb();
-        }).catch(function (error) {
-            self.emit('error', new gutil.PluginError(PLUGIN_NAME,  error.toString()));
-            cb();
-        });
+            } ).then( files => {
+                files.forEach(  f => {
+                    self.push( f );
+                } );
+                cb();
+            } ).catch(  error => {
+                self.emit( 'error', new gutil.PluginError( PLUGIN_NAME, error.toString() ) );
+                cb();
+            } );
     }
 
-    return through.obj(bufferContents);
+    return through.obj( bufferContents );
 }
 
 export = gulpAmodro;

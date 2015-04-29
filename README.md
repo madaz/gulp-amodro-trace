@@ -26,7 +26,10 @@ var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('task', function() {
   return gulp.src('main.js') // main.js is output from main.ts with sourcemaps
-    .pipe(amodro())
+    .pipe(amodro({
+        rootDir: 'c:/projects/foo/wwwroot',
+        excludeFiles: [ 'angular' ]
+    }))
     .pipe(sourcemaps.init({loadMaps:true}))
     .pipe(concat('bundle.js'))
     .pipe(gulp.dest('.')) // write unminified file
@@ -39,7 +42,10 @@ gulp.task('task', function() {
 });
 ```
 
+Options
+-------
+
 TODO
 ----
-* Allow for amodro-trace options to be be passed in
 * Unit tests
+* Options docs

@@ -6,16 +6,18 @@ var through = require('through2');
 var path = require('path');
 var amodroTrace = require('amodro-trace');
 var allWriteTransforms = require('amodro-trace/write/all');
-var PLUGIN_NAME = 'gulp-amodro';
+var PLUGIN_NAME = 'gulp-amodro-trace';
 // Create the writeTransform function by passing options to be used by the
 // write transform factories:
 var writeTransform = allWriteTransforms({});
-// options { rootDir: absolute path to wwwroot }
-var gulpAmodro = function (options) {
+var defaultOptions = {
+    includeContents: true,
+    rootDir: process.cwd(),
+    excludeFiles: []
+};
+var gulpAmodro = function (options, amdOptions) {
     gutil.log(gutil.colors.green(PLUGIN_NAME));
-    options = options || {};
-    options.rootDir = options.rootDir || process.cwd();
-    var firstFile;
+    options = options || defaultOptions;
     function bufferContents(file, enc, cb) {
         // ignore empty files
         if (file.isNull()) {
@@ -28,10 +30,6 @@ var gulpAmodro = function (options) {
             cb();
             return;
         }
-        // set first file if not already set
-        if (!firstFile) {
-            firstFile = file;
-        }
         var mainFile = path.parse(file.path);
         var rootDir = path.relative(options.rootDir, mainFile.dir);
         var self = this;
@@ -40,20 +38,19 @@ var gulpAmodro = function (options) {
             // AMD baseUrl is relative to. Should be an absolute path.
             rootDir: rootDir,
             id: mainFile.name,
-            includeContents: true,
+            includeContents: options.includeContents === true,
             writeTransform: writeTransform,
             fileRead: function (defaultRead, id, filePath) {
-                // performance, dont need to read again
+                if (options.excludeFiles.indexOf(id) > -1) {
+                    return '';
+                }
+                // performance, don't need to read again
                 if (id === mainFile.name) {
                     return file.contents.toString();
                 }
                 return defaultRead(id, filePath);
             }
-        }, {
-            // The AMD loader config to use.
-            baseUrl: '',
-            paths: {}
-        }).then(function (traceResult) {
+        }, amdOptions || {}).then(function (traceResult) {
             if (traceResult.errors && traceResult.errors.length) {
                 // throw to Promise.Catch()
                 var errorMessage = traceResult.errors.map(function (error) {
@@ -63,7 +60,12 @@ var gulpAmodro = function (options) {
             }
             // map each part
             return traceResult.traced.map(function (result) {
-                return new gutil.File({ cwd: "", base: "", path: result.path, contents: new Buffer(result.contents) });
+                return new gutil.File({
+                    cwd: "",
+                    base: "",
+                    path: result.path,
+                    contents: new Buffer(result.contents)
+                });
             });
         }).then(function (files) {
             files.forEach(function (f) {
