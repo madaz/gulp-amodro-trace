@@ -72,8 +72,7 @@ var gulpAmodro = function ( options: IOptions, amdOptions?: IAmdOptions ): NodeJ
                 includeContents: options.includeContents === true,
                 writeTransform: writeTransform,
                 fileRead: ( defaultRead: DefaultFileRead, id: string, filePath: string ): string => {
-
-                    if (options.excludeFiles.indexOf(id) > -1) {
+                    if ( options.excludeFiles.indexOf( id ) > -1 ) {
                         return '';
                     }
 
@@ -83,6 +82,12 @@ var gulpAmodro = function ( options: IOptions, amdOptions?: IAmdOptions ): NodeJ
                     }
 
                     return defaultRead( id, filePath );
+                },
+                fileExists: ( defaultFileExists: DefaultFileExists, id: string, filePath: string ): boolean => {
+                    if ( options.excludeFiles.indexOf( id ) > -1 ) {
+                        return true;
+                    }
+                    return defaultFileExists( id, filePath );
                 }
             }, amdOptions || {}
         ).then( ( traceResult ) => {
@@ -108,11 +113,11 @@ var gulpAmodro = function ( options: IOptions, amdOptions?: IAmdOptions ): NodeJ
                 } );
 
             } ).then( files => {
-                files.forEach(  f => {
+                files.forEach( f => {
                     self.push( f );
                 } );
                 cb();
-            } ).catch(  error => {
+            } ).catch( error => {
                 self.emit( 'error', new gutil.PluginError( PLUGIN_NAME, error.toString() ) );
                 cb();
             } );
