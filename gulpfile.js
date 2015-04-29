@@ -31,8 +31,9 @@ gulp.task('typescript', function () {
         .pipe(gulp.dest(config.dist));
 });
 
-gulp.task('build', [ 'typescript' ], function () {
-    gutil.log(gutil.colors('macro task to build'));
+gulp.task('build', [ 'typescript' ], function (cb) {
+    gutil.log(gutil.colors.gray('macro task to build'));
+    cb();
 });
 
 gulp.task('watch', function () {

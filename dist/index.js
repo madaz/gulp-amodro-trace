@@ -49,6 +49,12 @@ var gulpAmodro = function (options, amdOptions) {
                     return file.contents.toString();
                 }
                 return defaultRead(id, filePath);
+            },
+            fileExists: function (defaultFileExists, id, filePath) {
+                if (options.excludeFiles.indexOf(id) > -1) {
+                    return true;
+                }
+                return defaultFileExists(id, filePath);
             }
         }, amdOptions || {}).then(function (traceResult) {
             if (traceResult.errors && traceResult.errors.length) {
