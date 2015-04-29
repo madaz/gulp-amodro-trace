@@ -42,3 +42,4 @@ gulp.task('task', function() {
 TODO
 ----
 * Allow for amodro-trace options to be be passed in
+* Unit tests
