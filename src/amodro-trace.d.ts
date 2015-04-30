@@ -2,6 +2,7 @@
 declare module 'amodro-trace' {
 
     interface IFileResult {
+        id: string;
         path: string;
         contents: string;
     }

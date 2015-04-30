@@ -11,7 +11,6 @@ var PLUGIN_NAME = 'gulp-amodro-trace';
 // write transform factories:
 var writeTransform = allWriteTransforms({});
 var defaultOptions = {
-    includeContents: true,
     rootDir: process.cwd(),
     excludeFiles: []
 };
@@ -38,10 +37,10 @@ var gulpAmodro = function (options, amdOptions) {
             // AMD baseUrl is relative to. Should be an absolute path.
             rootDir: rootDir,
             id: mainFile.name,
-            includeContents: options.includeContents === true,
+            includeContents: true,
             writeTransform: writeTransform,
             fileRead: function (defaultRead, id, filePath) {
-                if (options.excludeFiles.indexOf(id) > -1) {
+                if (options.excludeFiles && options.excludeFiles.indexOf(id) > -1) {
                     return '';
                 }
                 // performance, don't need to read again
@@ -51,8 +50,8 @@ var gulpAmodro = function (options, amdOptions) {
                 return defaultRead(id, filePath);
             },
             fileExists: function (defaultFileExists, id, filePath) {
-                if (options.excludeFiles.indexOf(id) > -1) {
-                    return true;
+                if (options.excludeFiles && options.excludeFiles.indexOf(id) > -1) {
+                    return false;
                 }
                 return defaultFileExists(id, filePath);
             }

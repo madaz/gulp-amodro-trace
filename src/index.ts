@@ -27,14 +27,12 @@ interface IAmdOptions {
 
 interface IOptions {
     rootDir?: string;
-    includeContents: boolean;
     excludeFiles: string[]; // array of file ids to exclude
 //    fileExists?: ( defaultExists: DefaultFileExists, id: string, filePath: string ) => boolean;
 //    fileRead?: ( defaultRead: DefaultFileRead, id: string, filePath: string ) => string;
 }
 
 var defaultOptions: IOptions = {
-    includeContents: true,
     rootDir: process.cwd(),
     excludeFiles: []
 };
@@ -69,10 +67,10 @@ var gulpAmodro = function ( options: IOptions, amdOptions?: IAmdOptions ): NodeJ
                 // AMD baseUrl is relative to. Should be an absolute path.
                 rootDir: rootDir,
                 id: mainFile.name,
-                includeContents: options.includeContents === true,
+                includeContents: true,
                 writeTransform: writeTransform,
                 fileRead: ( defaultRead: DefaultFileRead, id: string, filePath: string ): string => {
-                    if ( options.excludeFiles.indexOf( id ) > -1 ) {
+                    if ( options.excludeFiles && options.excludeFiles.indexOf( id ) > -1 ) {
                         return '';
                     }
 
@@ -84,8 +82,8 @@ var gulpAmodro = function ( options: IOptions, amdOptions?: IAmdOptions ): NodeJ
                     return defaultRead( id, filePath );
                 },
                 fileExists: ( defaultFileExists: DefaultFileExists, id: string, filePath: string ): boolean => {
-                    if ( options.excludeFiles.indexOf( id ) > -1 ) {
-                        return true;
+                    if ( options.excludeFiles && options.excludeFiles.indexOf( id ) > -1 ) {
+                        return false;
                     }
                     return defaultFileExists( id, filePath );
                 }

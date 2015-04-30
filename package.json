@@ -1,6 +1,6 @@
 {
   "name": "gulp-amodro-trace",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "gulp plugin for amodro-trace",
   "homepage": "https://github.com/madaz/gulp-amodro-trace",
   "bugs": "https://github.com/madaz/gulp-amodro-trace/issues",

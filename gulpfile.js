@@ -31,11 +31,6 @@ gulp.task('typescript', function () {
         .pipe(gulp.dest(config.dist));
 });
 
-gulp.task('build', [ 'typescript' ], function (cb) {
-    gutil.log(gutil.colors.gray('macro task to build'));
-    cb();
-});
-
 gulp.task('watch', function () {
     gulp.watch(['src/*.ts', 'typings/**/*.d.ts'], ['typescript']);
 });
