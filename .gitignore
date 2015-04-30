@@ -5,6 +5,10 @@
 
 #node
 node_modules
+*.log
 
 #tsd definitions definitly typed
 typings/
+
+# osx
+.DS_Store
