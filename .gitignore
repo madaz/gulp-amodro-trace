@@ -1,13 +1,13 @@
-#editor webstorm
+# editor webstorm
 .idea
-#editor sublime
+# editor sublime
 *.sublime-*
 
-#node
-node_modules
-*.log
+# node
+node_modules/
+npm*.log
 
-#tsd definitions definitly typed
+# tsd definitions definitly typed
 typings/
 
 # osx

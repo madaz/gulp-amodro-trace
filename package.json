@@ -19,12 +19,16 @@
   },
   "devDependencies": {
     "gulp": "^3.8.11",
-    "gulp-typescript": "^2.6.0"
+    "gulp-typescript": "^2.6.0",
+    "mocha": "^2.2.5"
   },
   "dependencies": {
     "amodro-trace": "0.0.2",
     "gulp-util": "^3.0.4",
     "path": "^0.11.14",
     "through2": "^0.6.5"
+  },
+  "scripts": {
+    "test": "mocha"
   }
 }
